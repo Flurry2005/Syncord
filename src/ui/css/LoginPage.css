@@ -1,0 +1,8 @@
+.main-loginpage{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: 10%;
+    align-items: center;
+}

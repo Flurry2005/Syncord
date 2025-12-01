@@ -1,0 +1,68 @@
+import {app, BrowserWindow, ipcMain, session} from "electron"
+import path from 'path';
+import { isDev } from './util.js'
+import { getStaticData, pollResources } from "./resourceManager.js";
+import { getPreloadPath } from "./pathResolver.js";
+import { createUser } from "./createUser.js";
+import { loginUser } from "./loginUser.js";
+import 'dotenv/config'
+import { retrieveFriends } from "./retrieve_friends.js";
+
+app.commandLine.appendSwitch(
+  "disable-features",
+  "SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure"
+);
+app.commandLine.appendSwitch("enable-features", "AllowThirdPartyCookies");
+
+app.on("ready", () => {
+    const mainWindow = new BrowserWindow({
+        webPreferences:{
+            preload: getPreloadPath(),
+        }
+    });
+    if(isDev()) {
+        mainWindow.loadURL('http://localhost:5123');
+        
+    }else{
+        mainWindow.loadFile(path.join(app.getAppPath(), "/dist-react/index.html"));
+    }
+    pollResources(mainWindow);
+
+    ipcMain.handle("register", async (_event, { username, password }) => {
+        const result = await createUser(username, password);
+        console.log("Main process createUser result:", result);
+        return result;
+    });
+    ipcMain.handle("login", async (_event, { username, password }) => {
+        const result = await loginUser(username, password);
+        console.log("Main process authenticateUser result:", result.success);
+        try {
+            await session.defaultSession.cookies.set({
+                url: process.env.API!.slice(0, -4),
+                name: "token",
+                value: result.data.token,
+                path: "/",
+                httpOnly: true,
+                secure: true,
+                sameSite: "no_restriction",
+            });
+            console.log("Cookie set successfully!"+process.env.API!.slice(0, -4));
+        } catch (e) {
+            console.error("Failed to set cookie:", e);
+        }
+        return result;
+    });
+    ipcMain.handle("retrieve-friends", async (_event, { endpoint, options }) => {
+        const cookies = await session.defaultSession.cookies.get({ name: "token" });
+        const token = cookies[0]?.value;
+
+        if (!token) return { success: false, data: {desc: "No auth token" }};
+
+        const res = await retrieveFriends(endpoint,options,token);
+        console.log("Main process retrieve-friends result:", res.success);
+        return { success: res.success, data: res.data };
+    });
+    ipcMain.handle("getStaticData", () =>{
+        return getStaticData();
+    })
+})

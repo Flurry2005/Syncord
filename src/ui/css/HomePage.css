@@ -1,0 +1,36 @@
+.main-homepage{
+    display: grid;
+    grid-template-columns: .2fr 3fr;
+    grid-template-areas: 
+    "servernavmenu mainsection"
+    "servernavmenu mainsection"
+    ;
+}
+section{
+    min-width:auto;
+    min-height: 100%;
+    grid-area: mainsection;
+}
+
+.homepage-server-nav-menu{
+    padding: 0;
+    min-width: 8rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    grid-area: servernavmenu;
+}
+.homepage-server-nav-menu > button{
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1rem;
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    background-color: rgb(211, 38, 38);
+}
+.homepage-server-nav-menu > ul{
+    padding: 0;
+}

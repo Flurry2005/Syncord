@@ -16,6 +16,7 @@ dist-ssr
 .env
 deploy.sh
 dist
+*.psd
 
 # Editor directories and files
 .vscode/*

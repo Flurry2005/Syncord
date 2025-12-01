@@ -2,7 +2,7 @@
     "appId": "dev.liamjorgensen.electron",
     "files": ["dist-electron", "dist-react"],
     "extraResources":["dist-electron/preload.cjs"],
-    "icon": "./desktopIcon.png",
+    "icon": "./syncord_logo.png",
     "mac":{
         "target" : "dmg"
     },

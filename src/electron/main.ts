@@ -8,6 +8,7 @@ import { loginUser } from "./loginUser.js";
 import 'dotenv/config'
 import { retrieveFriends } from "./retrieve_friends.js";
 
+
 app.commandLine.appendSwitch(
   "disable-features",
   "SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure"
@@ -16,6 +17,9 @@ app.commandLine.appendSwitch("enable-features", "AllowThirdPartyCookies");
 
 app.on("ready", () => {
     const mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        icon: path.join(app.getAppPath(), "/syncord_logo.png"),
         webPreferences:{
             preload: getPreloadPath(),
         }

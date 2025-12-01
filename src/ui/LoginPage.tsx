@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
+import logo from "./assets/syncord_logo.png";
 import "./css/LoginPage.css";
 
 interface LoginPageProps {
@@ -70,30 +70,41 @@ function LoginPage({ login }: LoginPageProps) {
     }
   };
   return (
-    <main className="main-loginpage">
-      <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
+    <main className="flex flex-col justify-center items-center gap-2 w-full h-full">
+      <div className="mb-5 w-50 h-50">
+        <a
+          href="https://liamjorgensen.dev"
+          target="_blank"
+          className="flex justify-center items-center w-full h-full"
+        >
+          <img
+            src={logo}
+            className="block w-full min-h-full object-cover logo syncord"
+            alt="Syncord logo"
+          />
         </a>
       </div>
-      <h1>Create User</h1>
-      <div className="card">
+      <h1 className="text-4xl">Create User</h1>
+      <div className="flex flex-col gap-2">
         <label htmlFor="username">Username: </label>
         <input
           id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          className="px-2 border border-(--accent-color) rounded-xl outline-none"
         />
         <label htmlFor="password">Password: </label>
         <input
           id="password"
           value={password}
+          type="password"
           onChange={(e) => setPassword(e.target.value)}
+          className="px-2 border border-(--accent-color) rounded-xl outline-none"
         />
         {registered ? (
-          <p>User created successfully!</p>
+          <p className="text-center">User created successfully!</p>
         ) : (
-          <p>{serverResponse}</p>
+          <p className="text-center">{serverResponse}</p>
         )}
         <button
           onClick={async () => {
@@ -105,8 +116,13 @@ function LoginPage({ login }: LoginPageProps) {
         >
           {loginMode ? "Login" : "Register"}
         </button>
-        <a onClick={handleSetLoginMode}>{loginMode ? "Register" : "Login"}</a>
-        <small>&copy; Liam Jörgensen 2025</small>
+        <a
+          onClick={handleSetLoginMode}
+          className="text-center text-(--accent-color)"
+        >
+          {loginMode ? "Register" : "Login"}
+        </a>
+        <small className="text-center">&copy; Liam Jörgensen 2025</small>
       </div>
     </main>
   );

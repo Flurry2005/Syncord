@@ -13,7 +13,7 @@ export default function SocialsSidebar({ logout }: SocialsSidebarProps) {
   const [friendRequestUsername, setFriendRequestUsername] = useState("");
   const [friendsMode, setFriendsMode] = useState(true);
   const [friends, setFriends] = useState<string[]>([]);
-  const friendRequests: Array<string> = ["Hej", "Hej"];
+  const [friendRequests, setfriendRequests] = useState<string[]>([]);
 
   // Fetch friend on first load
   useEffect(() => {
@@ -31,6 +31,20 @@ export default function SocialsSidebar({ logout }: SocialsSidebarProps) {
       setFriends(friendsList);
     } else {
       setFriends([]);
+    }
+  };
+  const handleRetrieveFriendRequests = async () => {
+    //@ts-ignore
+    const result = await window.electron.retrieveFriendRequests();
+    if (!result) setfriendRequests([]);
+    console.log(Array.isArray(result.data));
+    if (result.success) {
+      const friendRequestsList = result.data;
+      console.log(friendRequestsList);
+      setfriendRequests(friendRequestsList);
+    } else {
+      console.log("Error" + result.data);
+      setfriendRequests([]);
     }
   };
 
@@ -79,7 +93,10 @@ export default function SocialsSidebar({ logout }: SocialsSidebarProps) {
         </button>
         <button
           className="flex justify-center justify-items-center items-center h-7"
-          onClick={() => handleSetFriendsMode(false)}
+          onClick={() => {
+            handleRetrieveFriendRequests();
+            handleSetFriendsMode(false);
+          }}
         >
           <i className="fa-user-group flex justify-items-center items-center text-center fa-solid"></i>
           ?

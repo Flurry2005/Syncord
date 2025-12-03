@@ -5,7 +5,14 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import jwt
 from flask_cors import CORS
-from routes import login, register, retreive_friends, verify_jwt, send_friend_request
+from routes import (
+    login,
+    register,
+    verify_jwt,
+    send_friend_request,
+    retrieve_friend_requests,
+    retrieve_friends,
+)
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -45,9 +52,10 @@ class BackendHandler:
     def register_routes(self):
         login.register_routes(self.app, self.mydb, self.ph)
         register.register_routes(self.app, self.mydb, self.ph)
-        retreive_friends.register_routes(self.app, self.mydb)
+        retrieve_friends.register_routes(self.app, self.mydb)
         verify_jwt.register_routes(self.app)
         send_friend_request.register_routes(self.app, self.mydb)
+        retrieve_friend_requests.register_routes(self.app, self.mydb)
 
     def before_every_request(self):
         real_ip = request.headers.get("X-Real-IP")

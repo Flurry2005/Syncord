@@ -9,6 +9,7 @@ import 'dotenv/config'
 import { retrieveFriends } from "./retrieve_friends.js";
 import { verifyJWT } from "./verifyJWT.js";
 import { sendFriendRequest } from "./sendFriendRequest.js";
+import { retrieveFriendRequests } from "./retrieveFriendRequests.js";
 
 
 app.commandLine.appendSwitch(
@@ -70,6 +71,16 @@ app.on("ready", () => {
 
         const res = await retrieveFriends(endpoint,options,token);
         console.log("Main process retrieve-friends result:", res.success);
+        return { success: res.success, data: res.data };
+    });
+    ipcMain.handle("retrieve-friend-requests", async (_event, { endpoint, options }) => {
+        const cookies = await session.defaultSession.cookies.get({ name: "token" });
+        const token = cookies[0]?.value;
+
+        if (!token) return { success: false, data: {desc: "No auth token" }};
+
+        const res = await retrieveFriendRequests(endpoint,options,token);
+        console.log("Main process retrieve-friend-requests result:", res.success);
         return { success: res.success, data: res.data };
     });
     ipcMain.handle("send-friend-request", async (_event, { endpoint, options , username}) => {

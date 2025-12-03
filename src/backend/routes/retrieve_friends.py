@@ -29,7 +29,7 @@ def register_routes(app, mydb: MySQLConnection):
                     cursor = mydb.cursor()
                     cursor.execute(get_friend_info_query, values_1)
                     username = cursor.fetchone()
-                    friend_list.append(username)
+                    friend_list.append(username[0])
                 else:
                     get_friend_info_query = (
                         "SELECT username FROM users WHERE user_id = %s"

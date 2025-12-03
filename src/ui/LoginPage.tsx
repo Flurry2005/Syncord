@@ -14,9 +14,23 @@ function LoginPage({ login }: LoginPageProps) {
   const [serverResponse, setServerResponse] = useState("");
 
   useEffect(() => {
-    // @ts-ignore
-    window.electron.subscribeStatistics((stats) => console.log(stats));
+    //window.electron.subscribeStatistics((stats) => console.log(stats));
   }, []);
+
+  const verify = async () => {
+    try {
+      // @ts-ignore
+      const res = await window.electron.verifyJWT();
+
+      if (res.success) {
+        login(true);
+      } else {
+        console.log("Failed auto login: " + res.success);
+      }
+    } catch (err) {
+      console.error("Error verifying JWT:", err);
+    }
+  };
 
   function handleSetLoginMode() {
     setLoginMode((prev) => !prev);
@@ -24,6 +38,7 @@ function LoginPage({ login }: LoginPageProps) {
 
   const handleRegister = async () => {
     try {
+      if (username.length == 0 || password.length == 0) return;
       // @ts-ignore
       const result = await window.electron.register(username, password);
       console.log("Renderer received:", result);
@@ -46,6 +61,10 @@ function LoginPage({ login }: LoginPageProps) {
   };
   const handleLogin = async () => {
     try {
+      if (username.length == 0 || password.length == 0) {
+        verify();
+        return;
+      }
       // @ts-ignore
       const result = await window.electron.login(username, password);
       console.log("Renderer received:", result);
@@ -79,7 +98,7 @@ function LoginPage({ login }: LoginPageProps) {
         >
           <img
             src={logo}
-            className="block w-full min-h-full object-cover logo syncord"
+            className="block w-full min-h-full object-fill logo syncord"
             alt="Syncord logo"
           />
         </a>

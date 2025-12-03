@@ -20,4 +20,15 @@ contextBridge.exposeInMainWorld("electron", {
     endpoint: "/retrieve-friends",
     options: { method: "GET" },
   }),
+  verifyJWT: (): Promise<any> =>
+    ipcRenderer.invoke("verify-JWT", {
+    endpoint: "/verify-jwt",
+    options: { method: "GET" },
+  }),
+  sendFriendRequest: (username: string): Promise<any> =>
+    ipcRenderer.invoke("send-friend-request", {
+    endpoint: "/send-friend-request",
+    options: { method: "POST", headers: { "Content-Type": "application/json" }, },
+    username,
+  }),
 });

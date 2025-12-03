@@ -5,7 +5,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import jwt
 from flask_cors import CORS
-from routes import login, register, retreive_friends
+from routes import login, register, retreive_friends, verify_jwt, send_friend_request
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -46,6 +46,8 @@ class BackendHandler:
         login.register_routes(self.app, self.mydb, self.ph)
         register.register_routes(self.app, self.mydb, self.ph)
         retreive_friends.register_routes(self.app, self.mydb)
+        verify_jwt.register_routes(self.app)
+        send_friend_request.register_routes(self.app, self.mydb)
 
     def before_every_request(self):
         real_ip = request.headers.get("X-Real-IP")
@@ -54,7 +56,11 @@ class BackendHandler:
             f'\n{"Incoming request from " + real_ip + ";" + forwarded_for:^50}\n{"-"*50}'
         )
 
-        if request.endpoint != "login" and request.endpoint != "register":
+        if (
+            request.endpoint != "login"
+            and request.endpoint != "register"
+            and request.endpoint != "verify-jwt"
+        ):
             resp = self.verify_jwt()
             if resp is not None:
                 return resp
@@ -69,6 +75,7 @@ class BackendHandler:
             res = jwt.decode(token, os.environ.get("SECRET"), algorithms="HS256")
             g.uid = res["uid"]
             g.username = res["username"]
+            print(g.uid)
             return None
         except jwt.ExpiredSignatureError:
             return jsonify({"status": 500, "desc": "Token Expired"})

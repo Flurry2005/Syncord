@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, session} from "electron"
+import {app, BrowserWindow, ipcMain, session, shell} from "electron"
 import path from 'path';
 import { isDev } from './util.js'
 import { getStaticData, pollResources } from "./resourceManager.js";
@@ -7,6 +7,8 @@ import { createUser } from "./createUser.js";
 import { loginUser } from "./loginUser.js";
 import 'dotenv/config'
 import { retrieveFriends } from "./retrieve_friends.js";
+import { verifyJWT } from "./verifyJWT.js";
+import { sendFriendRequest } from "./sendFriendRequest.js";
 
 
 app.commandLine.appendSwitch(
@@ -23,6 +25,10 @@ app.on("ready", () => {
         webPreferences:{
             preload: getPreloadPath(),
         }
+    });
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
     });
     if(isDev()) {
         mainWindow.loadURL('http://localhost:5123');
@@ -64,6 +70,26 @@ app.on("ready", () => {
 
         const res = await retrieveFriends(endpoint,options,token);
         console.log("Main process retrieve-friends result:", res.success);
+        return { success: res.success, data: res.data };
+    });
+    ipcMain.handle("send-friend-request", async (_event, { endpoint, options , username}) => {
+        const cookies = await session.defaultSession.cookies.get({ name: "token" });
+        const token = cookies[0]?.value;
+
+        if (!token) return { success: false, data: {desc: "No auth token" }};
+
+        const res = await sendFriendRequest(endpoint,options,token, username);
+        console.log("Main process sendFriendRequest result:", res.success);
+        return { success: res.success, desc: res.desc };
+    });
+    ipcMain.handle("verify-JWT", async (_event, { endpoint, options }) => {
+        const cookies = await session.defaultSession.cookies.get({ name: "token" });
+        const token = cookies[0]?.value;
+
+        if (!token) return { success: false, data: {desc: "No auth token" }};
+
+        const res = await verifyJWT(endpoint,options,token);
+        console.log("Main process verifyJWT result:", res.success);
         return { success: res.success, data: res.data };
     });
     ipcMain.handle("getStaticData", () =>{

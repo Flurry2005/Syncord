@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import logo from "./assets/syncord_logo.png";
+import logo from "./assets/syncord_logo_text.png";
 import "./css/LoginPage.css";
 
 interface LoginPageProps {
-  login: (val: boolean) => void;
+  login: (val: boolean, val1: string) => void;
 }
 
 function LoginPage({ login }: LoginPageProps) {
@@ -23,7 +23,7 @@ function LoginPage({ login }: LoginPageProps) {
       const res = await window.electron.verifyJWT();
 
       if (res.success) {
-        login(true);
+        login(true, username);
       } else {
         console.log("Failed auto login: " + res.success);
       }
@@ -98,12 +98,11 @@ function LoginPage({ login }: LoginPageProps) {
         >
           <img
             src={logo}
-            className="block w-full min-h-full object-fill logo syncord"
+            className="block mb-2 w-full min-h-fit object-fill logo syncord"
             alt="Syncord logo"
           />
         </a>
       </div>
-      <h1 className="text-4xl">Create User</h1>
       <div className="flex flex-col gap-2">
         <label htmlFor="username">Username: </label>
         <input
@@ -130,7 +129,9 @@ function LoginPage({ login }: LoginPageProps) {
             const success = loginMode
               ? await handleLogin()
               : await handleRegister();
-            if (success) login(true);
+            if (success) {
+              login(true, username);
+            }
           }}
         >
           {loginMode ? "Login" : "Register"}

@@ -1,20 +1,22 @@
 import { useState } from "react";
 import LoginPage from "./LoginPage.tsx";
 import "./css/App.css";
-import HomePage from "./HomePage.tsx";
+import HomePage from "./HomePage/HomePage.tsx";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
-
-  function handleLoggedIn(loggedIn: boolean) {
+  const [username, setUsername] = useState("");
+  function handleLoggedIn(loggedIn: boolean, username?: string) {
+    username && setUsername(username);
     setLoggedIn(loggedIn);
   }
+
   return (
     <>
       {!loggedIn ? (
         <LoginPage login={handleLoggedIn}></LoginPage>
       ) : (
-        <HomePage logout={handleLoggedIn}></HomePage>
+        <HomePage logout={handleLoggedIn} username={username}></HomePage>
       )}
     </>
   );

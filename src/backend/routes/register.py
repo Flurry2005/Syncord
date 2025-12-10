@@ -40,7 +40,7 @@ def register_routes(app, mydb: MySQLConnection, ph: PasswordHasher):
         return jsonify({"status": 200, "desc": "Account created!"})
 
 
-def hash_pass(password, ph):
+def hash_pass(password, ph: PasswordHasher):
     # Create a PasswordHasher instance with recommended settings
 
     # --------------------------

@@ -36,4 +36,10 @@ contextBridge.exposeInMainWorld("electron", {
     options: { method: "POST", headers: { "Content-Type": "application/json" }, },
     username,
   }),
+  friendRequestDecision: (username: string, accept: boolean): Promise<any> =>
+    ipcRenderer.invoke("friend-request-decision", {
+    endpoint: "/friend-request-decision",
+    options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: username, accept: accept}) },
+    username,
+  }),
 });

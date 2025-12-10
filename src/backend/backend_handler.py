@@ -12,6 +12,7 @@ from routes import (
     send_friend_request,
     retrieve_friend_requests,
     retrieve_friends,
+    friend_request_decision,
 )
 from dotenv import load_dotenv
 
@@ -56,6 +57,7 @@ class BackendHandler:
         verify_jwt.register_routes(self.app)
         send_friend_request.register_routes(self.app, self.mydb)
         retrieve_friend_requests.register_routes(self.app, self.mydb)
+        friend_request_decision.register_routes(self.app, self.mydb)
 
     def before_every_request(self):
         real_ip = request.headers.get("X-Real-IP")

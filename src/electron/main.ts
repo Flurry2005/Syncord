@@ -3,13 +3,14 @@ import path from 'path';
 import { isDev } from './util.js'
 import { getStaticData, pollResources } from "./resourceManager.js";
 import { getPreloadPath } from "./pathResolver.js";
-import { createUser } from "./createUser.js";
-import { loginUser } from "./loginUser.js";
+import { createUser } from "./BackendInteraction/createUser.js";
+import { loginUser } from "./BackendInteraction/loginUser.js";
 import 'dotenv/config'
-import { retrieveFriends } from "./retrieve_friends.js";
-import { verifyJWT } from "./verifyJWT.js";
-import { sendFriendRequest } from "./sendFriendRequest.js";
-import { retrieveFriendRequests } from "./retrieveFriendRequests.js";
+import { retrieveFriends } from "./BackendInteraction/retrieve_friends.js";
+import { verifyJWT } from "./BackendInteraction/verifyJWT.js";
+import { sendFriendRequest } from "./BackendInteraction/sendFriendRequest.js";
+import { retrieveFriendRequests } from "./BackendInteraction/retrieveFriendRequests.js";
+import { friendRequestDecision } from "./BackendInteraction/friendRequestDecision.js";
 
 
 app.commandLine.appendSwitch(
@@ -20,8 +21,8 @@ app.commandLine.appendSwitch("enable-features", "AllowThirdPartyCookies");
 
 app.on("ready", () => {
     const mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1920,
+        height: 1080,
         icon: path.join(app.getAppPath(), "/syncord_logo.png"),
         webPreferences:{
             preload: getPreloadPath(),
@@ -91,6 +92,16 @@ app.on("ready", () => {
 
         const res = await sendFriendRequest(endpoint,options,token, username);
         console.log("Main process sendFriendRequest result:", res.success);
+        return { success: res.success, desc: res.desc };
+    });
+    ipcMain.handle("friend-request-decision", async (_event, { endpoint, options}) => {
+        const cookies = await session.defaultSession.cookies.get({ name: "token" });
+        const token = cookies[0]?.value;
+
+        if (!token) return { success: false, data: {desc: "No auth token" }};
+
+        const res = await friendRequestDecision(endpoint,options,token);
+        console.log("Main process Friend Request Decision result:", res.success);
         return { success: res.success, desc: res.desc };
     });
     ipcMain.handle("verify-JWT", async (_event, { endpoint, options }) => {

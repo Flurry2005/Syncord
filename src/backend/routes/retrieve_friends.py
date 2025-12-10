@@ -11,7 +11,7 @@ def register_routes(app, mydb: MySQLConnection):
     @app.route("/retrieve-friends", methods=["GET"])
     def retrieve_friends():
         try:
-            query = "SELECT * FROM friendships WHERE user_id = %s OR friend_id = %s;"
+            query = "SELECT * FROM friendships WHERE user1_id = %s OR user2_id = %s;"
             values = (g.uid, g.uid)
 
             cursor = mydb.cursor()

@@ -1,6 +1,7 @@
 import SocialsSidebar from "./SocialsSideBar";
-import UserBanner from "./UserBanner";
 import "../css/HomePage.css";
+import ChatSection from "./ChatSection";
+import { FriendsProvider } from "./context/FriendsContext";
 
 interface HomePageProps {
   logout: (val: boolean) => void;
@@ -10,10 +11,10 @@ interface HomePageProps {
 function HomePage({ logout, username }: HomePageProps) {
   return (
     <main className="flex w-full h-full">
-      <SocialsSidebar logout={logout}></SocialsSidebar>
-      <section className="relative w-[100%] h-full">
-        <UserBanner uname={username} />
-      </section>
+      <FriendsProvider>
+        <SocialsSidebar logout={logout} username={username}></SocialsSidebar>
+        <ChatSection username={username}></ChatSection>
+      </FriendsProvider>
     </main>
   );
 }

@@ -12,7 +12,7 @@ function UserBanner({ uname }: UserBannerProps) {
   }, []);
 
   return (
-    <div className="top-2 right-2 absolute flex justify-center items-center bg-neutral-900/80 border border-(--accent-color) rounded-2xl w-2/10 h-15">
+    <div className="top-2 right-2 flex justify-center items-center self-center bg-neutral-900/80 border border-(--accent-color) rounded-2xl w-9/10 h-15">
       <div className="flex items-center gap-1 w-8/10">
         <h1>{username}</h1>
         <p className="bg-green-500 rounded-[50%] w-3 h-3"></p>

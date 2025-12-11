@@ -2,18 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import "../css/ServerNavMenu.css";
 import FriendsList from "./Friends";
 import FriendRequests from "./FriendRequests";
+import { useFriends } from "./context/FriendsContext";
+import UserBanner from "./UserBanner";
 
 interface SocialsSidebarProps {
+  username: string;
   logout: (val: boolean) => void;
 }
 
-export default function SocialsSidebar({ logout }: SocialsSidebarProps) {
+export default function SocialsSidebar({
+  username,
+  logout,
+}: SocialsSidebarProps) {
   const friendsElements = useRef<HTMLParagraphElement[]>([]);
   const [placeholder, setPlaceholder] = useState("Enter username...");
   const [friendRequestUsername, setFriendRequestUsername] = useState("");
   const [friendsMode, setFriendsMode] = useState(true);
   const [friends, setFriends] = useState<string[]>([]);
   const [friendRequests, setfriendRequests] = useState<string[]>([]);
+  const { setSelectedFriend } = useFriends();
 
   // Fetch friend on first load
   useEffect(() => {
@@ -79,10 +86,11 @@ export default function SocialsSidebar({ logout }: SocialsSidebarProps) {
     });
 
     p instanceof HTMLElement && p.classList.add("bg-white/10");
+    setSelectedFriend(p.textContent);
   };
 
   return (
-    <nav className="justify-items-center grid grid-rows-[.1fr_.2fr_.3fr_3fr_.2fr] bg-neutral-900 w-60 h-full">
+    <nav className="justify-items-center grid grid-rows-[.1fr_.2fr_.3fr_3fr_.4fr_.2fr] bg-neutral-900 w-60 h-full">
       <h1>Social</h1>
       <div className="flex gap-4">
         <button
@@ -133,6 +141,7 @@ export default function SocialsSidebar({ logout }: SocialsSidebarProps) {
       ) : (
         <FriendRequests friendRequests={friendRequests} />
       )}
+      <UserBanner uname={username} />
       <button
         className="flex justify-center items-center bg-red-700! border-0! w-3/4 h-3/4"
         onClick={() => logout(false)}

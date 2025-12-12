@@ -76,15 +76,25 @@ function LoginPage({ login }: LoginPageProps) {
 
       if (result.success) {
         console.log("User logged in:", result.data);
+
+        //Establish socket connection to server
+        // @ts-ignore
+        const res = await window.electron.establishSocketConnection();
+
+        if (!res.success) return false;
+
         setServerResponse(result.data.desc);
         return true;
       } else {
         console.error("Failed authenticating user:", result.error);
-        setServerResponse(result.data.desc);
+        setServerResponse(
+          result.data.desc == null ? "Failed to login" : result.data.desc
+        );
         return false;
       }
     } catch (err) {
       console.error("IPC error:", err);
+      setServerResponse("Failed to login");
       return false;
     }
   };

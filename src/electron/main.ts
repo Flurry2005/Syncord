@@ -1,16 +1,12 @@
 import {app, BrowserWindow, ipcMain, session, shell} from "electron"
 import path from 'path';
-import { isDev } from './util.js'
-import { getStaticData, pollResources } from "./resourceManager.js";
+import { getJWTToken, isDev } from './util.js'
 import { getPreloadPath } from "./pathResolver.js";
 import { createUser } from "./BackendInteraction/createUser.js";
 import { loginUser } from "./BackendInteraction/loginUser.js";
-import 'dotenv/config'
-import { retrieveFriends } from "./BackendInteraction/retrieve_friends.js";
-import { verifyJWT } from "./BackendInteraction/verifyJWT.js";
-import { sendFriendRequest } from "./BackendInteraction/sendFriendRequest.js";
-import { retrieveFriendRequests } from "./BackendInteraction/retrieveFriendRequests.js";
-import { friendRequestDecision } from "./BackendInteraction/friendRequestDecision.js";
+import dotenv from "dotenv";
+import { establishSocketConnection } from "./BackendInteraction/establishSocketConnection.js";
+import { reqWithToken } from "./BackendInteraction/reqWithToken.js";
 
 
 app.commandLine.appendSwitch(
@@ -28,6 +24,15 @@ app.on("ready", () => {
             preload: getPreloadPath(),
         }
     });
+
+    const isDev_ = !app.isPackaged;
+
+    dotenv.config({
+    path: isDev_
+        ? path.join(process.cwd(), ".env")
+        : path.join(process.resourcesPath, ".env")
+    });
+
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);
         return { action: 'deny' };
@@ -38,7 +43,6 @@ app.on("ready", () => {
     }else{
         mainWindow.loadFile(path.join(app.getAppPath(), "/dist-react/index.html"));
     }
-    pollResources(mainWindow);
 
     ipcMain.handle("register", async (_event, { username, password }) => {
         const result = await createUser(username, password);
@@ -65,56 +69,74 @@ app.on("ready", () => {
         return result;
     });
     ipcMain.handle("retrieve-friends", async (_event, { endpoint, options }) => {
-        const cookies = await session.defaultSession.cookies.get({ name: "token" });
-        const token = cookies[0]?.value;
+        const token = await getJWTToken(session);
 
         if (!token) return { success: false, data: {desc: "No auth token" }};
 
-        const res = await retrieveFriends(endpoint,options,token);
+        const res = await reqWithToken(endpoint,options,token);
         console.log("Main process retrieve-friends result:", res.success);
         return { success: res.success, data: res.data };
     });
     ipcMain.handle("retrieve-friend-requests", async (_event, { endpoint, options }) => {
-        const cookies = await session.defaultSession.cookies.get({ name: "token" });
-        const token = cookies[0]?.value;
-
+        const token = await getJWTToken(session);
         if (!token) return { success: false, data: {desc: "No auth token" }};
 
-        const res = await retrieveFriendRequests(endpoint,options,token);
+        const res = await reqWithToken(endpoint,options,token);
         console.log("Main process retrieve-friend-requests result:", res.success);
         return { success: res.success, data: res.data };
     });
-    ipcMain.handle("send-friend-request", async (_event, { endpoint, options , username}) => {
-        const cookies = await session.defaultSession.cookies.get({ name: "token" });
-        const token = cookies[0]?.value;
-
+    ipcMain.handle("send-friend-request", async (_event, { endpoint, options}) => {
+        const token = await getJWTToken(session);
         if (!token) return { success: false, data: {desc: "No auth token" }};
 
-        const res = await sendFriendRequest(endpoint,options,token, username);
+        const res = await reqWithToken(endpoint,options,token);
         console.log("Main process sendFriendRequest result:", res.success);
         return { success: res.success, desc: res.desc };
     });
     ipcMain.handle("friend-request-decision", async (_event, { endpoint, options}) => {
-        const cookies = await session.defaultSession.cookies.get({ name: "token" });
-        const token = cookies[0]?.value;
-
+        const token = await getJWTToken(session);
         if (!token) return { success: false, data: {desc: "No auth token" }};
 
-        const res = await friendRequestDecision(endpoint,options,token);
+        const res = await reqWithToken(endpoint,options,token);
         console.log("Main process Friend Request Decision result:", res.success);
         return { success: res.success, desc: res.desc };
     });
-    ipcMain.handle("verify-JWT", async (_event, { endpoint, options }) => {
-        const cookies = await session.defaultSession.cookies.get({ name: "token" });
-        const token = cookies[0]?.value;
+    ipcMain.handle("establish-socket-connection", async (_event) => {
+        const token = await getJWTToken(session);
+        if (!token) return { success: false, desc: "No auth token" };
 
+        const socket = await establishSocketConnection(token);
+        try {
+            await new Promise<void>((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
+
+                socket.on("connect", () => {
+                    clearTimeout(timeout);
+                    resolve();
+                });
+
+                socket.on("connect_error", () => {
+                    clearTimeout(timeout);
+                    reject(new Error("Connect error"));
+                });
+            });
+        } catch (err) {
+            console.error("[Socket.IO] Connection failed:", err);
+            return false; // Return false if it fails
+        }
+
+        socket.on("friend_online", (data) => {mainWindow.webContents.send("friend_online", data); console.log(data)});
+        socket.on("friend_offline", (data) => {mainWindow.webContents.send("friend_offline", data); console.log(data)});
+        console.log("Main process Tried to establish socket connection: ", socket.connected);
+
+        return {success: socket.connected}; // Return true if connected
+    });
+    ipcMain.handle("verify-JWT", async (_event, { endpoint, options }) => {
+        const token = await getJWTToken(session);
         if (!token) return { success: false, data: {desc: "No auth token" }};
 
-        const res = await verifyJWT(endpoint,options,token);
+        const res = await reqWithToken(endpoint,options,token);
         console.log("Main process verifyJWT result:", res.success);
         return { success: res.success, data: res.data };
     });
-    ipcMain.handle("getStaticData", () =>{
-        return getStaticData();
-    })
 })

@@ -1,10 +1,12 @@
 import os
 from flask import Flask, request, jsonify, g
+from flask_socketio import SocketIO
 import mysql.connector
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import jwt
 from flask_cors import CORS
+import client_handler
 from routes import (
     login,
     register,
@@ -47,7 +49,6 @@ class BackendHandler:
             password=os.environ.get("DBPASSWORD"),
         )
         self.app.before_request(self.before_every_request)
-
         self.register_routes()
 
     def register_routes(self):
@@ -93,6 +94,15 @@ class BackendHandler:
             return jsonify({"status": 500, "desc": "Invalid token"})
 
 
+handler = BackendHandler()
+socketio = SocketIO(handler.app)
+
+client_handler.register_socket_events(socketio, handler.mydb)
+
 if __name__ == "__main__":
-    handler = BackendHandler()
-    handler.app.run(host="127.0.0.1", port=5000)
+    import eventlet
+    import eventlet.wsgi
+
+    socketio.run(
+        handler.app, host="127.0.0.1", port=5000, debug=True, use_reloader=False
+    )

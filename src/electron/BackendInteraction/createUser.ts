@@ -1,5 +1,3 @@
-import 'dotenv/config'
-
 export async function createUser(username: string, password: string) {
   try {
     const res = await fetch(process.env.API+'/register', {

@@ -2,3 +2,5 @@ mysql-connector-python
 flask
 PyJWT
 argon2
+flask-socketio
+eventlet

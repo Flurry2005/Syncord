@@ -1,5 +1,6 @@
 {
   "name": "Syncord",
+  "author": "Syncord",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -23,6 +24,7 @@
     "os-utils": "^0.0.14",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {

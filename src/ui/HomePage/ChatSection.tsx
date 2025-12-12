@@ -18,7 +18,7 @@ function ChatSection({ username }: ChatSectionProps) {
           <textarea className="self-center border border-(--accent-color) rounded-3xl w-9/10 h-1/10 p-3 outline-none focus:border-[#747bff]" />
         </section>
       ) : (
-        <p>No friend selected!</p>
+        <p>No friend selected!{username}</p>
       )}
     </section>
   );

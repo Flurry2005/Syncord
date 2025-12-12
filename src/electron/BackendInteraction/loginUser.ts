@@ -1,4 +1,3 @@
-import 'dotenv/config'
 export async function loginUser(username: string, password: string) {
   try {
     const res = await fetch(process.env.API+'/login', {

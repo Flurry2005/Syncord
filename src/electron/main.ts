@@ -7,7 +7,7 @@ import { loginUser } from "./BackendInteraction/loginUser.js";
 import dotenv from "dotenv";
 import { establishSocketConnection } from "./BackendInteraction/establishSocketConnection.js";
 import { reqWithToken } from "./BackendInteraction/reqWithToken.js";
-
+import { Socket } from "socket.io-client";
 
 app.commandLine.appendSwitch(
   "disable-features",
@@ -32,6 +32,8 @@ app.on("ready", () => {
         ? path.join(process.cwd(), ".env")
         : path.join(process.resourcesPath, ".env")
     });
+
+    let socket: Socket;
 
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);
@@ -101,11 +103,18 @@ app.on("ready", () => {
         console.log("Main process Friend Request Decision result:", res.success);
         return { success: res.success, desc: res.desc };
     });
+
+    ipcMain.on("frontend_ready", async () => {
+        if (!socket) return;
+
+        socket.emit("request_initial_online_friends");
+    });
+
     ipcMain.handle("establish-socket-connection", async (_event) => {
         const token = await getJWTToken(session);
         if (!token) return { success: false, desc: "No auth token" };
 
-        const socket = await establishSocketConnection(token);
+        socket = await establishSocketConnection(token);
         try {
             await new Promise<void>((resolve, reject) => {
                 const timeout = setTimeout(() => reject(new Error("Timeout")), 5000);
@@ -128,7 +137,6 @@ app.on("ready", () => {
         socket.on("friend_online", (data) => {mainWindow.webContents.send("friend_online", data); console.log(data)});
         socket.on("friend_offline", (data) => {mainWindow.webContents.send("friend_offline", data); console.log(data)});
         console.log("Main process Tried to establish socket connection: ", socket.connected);
-
         return {success: socket.connected}; // Return true if connected
     });
     ipcMain.handle("verify-JWT", async (_event, { endpoint, options }) => {

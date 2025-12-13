@@ -10,6 +10,11 @@ interface SocialsSidebarProps {
   logout: (val: boolean) => void;
 }
 
+type Friend = {
+  username: string;
+  online: boolean;
+};
+
 export default function SocialsSidebar({
   username,
   logout,
@@ -18,14 +23,40 @@ export default function SocialsSidebar({
   const [placeholder, setPlaceholder] = useState("Enter username...");
   const [friendRequestUsername, setFriendRequestUsername] = useState("");
   const [friendsMode, setFriendsMode] = useState(true);
-  const [friends, setFriends] = useState<string[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [friendRequests, setfriendRequests] = useState<string[]>([]);
   const { setSelectedFriend } = useFriends();
 
   // Fetch friend on first load
   useEffect(() => {
     handleGetFriends();
+    // @ts-ignore
+    window.electron.onFriendOnline((data: any) => {
+      const username = data.username;
+
+      setFriends((prev) => {
+        return prev.map((friend) =>
+          friend.username === username ? { ...friend, online: true } : friend
+        );
+      });
+    });
+    // @ts-ignore
+    window.electron.onFriendOffline((data: any) => {
+      const username = data.username;
+
+      setFriends((prev) => {
+        return prev.map((friend) =>
+          friend.username === username ? { ...friend, online: false } : friend
+        );
+      });
+    });
+    // @ts-ignore
+    window.electron.emit("frontend_ready");
   }, []);
+
+  useEffect(() => {
+    console.log("Friends updated:", friends);
+  }, [friends]);
 
   const handleGetFriends = async () => {
     //@ts-ignore
@@ -34,8 +65,13 @@ export default function SocialsSidebar({
 
     if (result.success) {
       const friendsList = result.data;
-      console.log(friendsList);
-      setFriends(friendsList);
+
+      setFriends(
+        friendsList.map((u: string) => ({
+          username: u,
+          online: false,
+        }))
+      );
     } else {
       setFriends([]);
     }

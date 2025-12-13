@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, disconnect, emit
 from flask import request
 import jwt
 from utils.get_friends import get_friends  # implement this
+from utils.get_uname import get_uname  # implement this
 
 
 online_users = {}  # user_id: socket_id
@@ -21,12 +22,33 @@ def register_socket_events(socketio: SocketIO, mydb):
         online_users[user_id] = request.sid  # Map user_id to socket_id
         print(f"{username} ({user_id}) connected")
 
-        friends: dict[int, str] = get_friends(user_id, mydb)
+        friends: dict[int, str] = get_friends(user_id, mydb)  # uid, username
 
+        # Alert friend connecting user is oline
+        print(friends)
         for friend_id, friend_username in friends.items():
             if friend_id in online_users:
                 emit(
-                    "friend_online", {"user_id": user_id}, room=online_users[friend_id]
+                    "friend_online",
+                    {"username": username},
+                    room=online_users[friend_id],  # Room socket id
+                )
+
+    @socketio.on("request_initial_online_friends")
+    def send_initial_online_friends():
+        user_id = None
+        for uid, sid in online_users.items():
+            if sid == request.sid:
+                user_id = uid
+                break
+        friends: dict[int, str] = get_friends(user_id, mydb)
+        for friend_id, friend_username in friends.items():
+            if friend_id in online_users.keys():
+                print(f"Sending online friends to connecting user: {user_id}")
+                emit(
+                    "friend_online",
+                    {"username": friend_username},
+                    room=online_users[user_id],
                 )
 
     @socketio.on("disconnect")
@@ -41,17 +63,17 @@ def register_socket_events(socketio: SocketIO, mydb):
         if not disconnected_user_id:
             return  # user was not tracked
 
-        print(f"({disconnected_user_id}) disconnected!")
-
         online_users.pop(disconnected_user_id)
 
         # Notify friends
-        friends = get_friends(disconnected_user_id, mydb)
-        for friend_id in friends.keys():
+        friends: dict[int, str] = get_friends(disconnected_user_id, mydb)
+        username = get_uname(disconnected_user_id, mydb)
+        print(f"{username}({disconnected_user_id}) disconnected!")
+        for friend_id, friend_username in friends.items():
             if friend_id in online_users:
                 emit(
                     "friend_offline",
-                    {"user_id": disconnected_user_id},
+                    {"username": username},
                     room=online_users[friend_id],
                 )
 

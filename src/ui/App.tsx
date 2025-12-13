@@ -8,6 +8,8 @@ function App() {
   const [username, setUsername] = useState("");
   function handleLoggedIn(loggedIn: boolean, username?: string) {
     username && setUsername(username);
+    // @ts-ignore
+    if (!loggedIn) window.electron.closeSocketConnection();
     setLoggedIn(loggedIn);
   }
 

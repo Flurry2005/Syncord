@@ -61,11 +61,11 @@ class BackendHandler:
         friend_request_decision.register_routes(self.app, self.mydb)
 
     def before_every_request(self):
-        real_ip = request.headers.get("X-Real-IP")
-        forwarded_for = request.headers.get("X-Forwarded-For")
-        print(
-            f'\n{"Incoming request from " + real_ip + ";" + forwarded_for:^50}\n{"-"*50}'
-        )
+        # real_ip = request.headers.get("X-Real-IP")
+        # forwarded_for = request.headers.get("X-Forwarded-For")
+        # print(
+        #     f'\n{"Incoming request from " + real_ip + ";" + forwarded_for:^50}\n{"-"*50}'
+        # )
 
         if (
             request.endpoint != "login"
@@ -86,7 +86,6 @@ class BackendHandler:
             res = jwt.decode(token, os.environ.get("SECRET"), algorithms="HS256")
             g.uid = res["uid"]
             g.username = res["username"]
-            print(g.uid)
             return None
         except jwt.ExpiredSignatureError:
             return jsonify({"status": 500, "desc": "Token Expired"})

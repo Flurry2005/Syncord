@@ -25,7 +25,7 @@ def register_socket_events(socketio: SocketIO, mydb):
         friends: dict[int, str] = get_friends(user_id, mydb)  # uid, username
 
         # Alert friend connecting user is oline
-        print(friends)
+        print(f"{username} has gone online, alerting friends: {friends}")
         for friend_id, friend_username in friends.items():
             if friend_id in online_users:
                 emit(
@@ -42,9 +42,9 @@ def register_socket_events(socketio: SocketIO, mydb):
                 user_id = uid
                 break
         friends: dict[int, str] = get_friends(user_id, mydb)
+        print(f"Sending online friends to connecting user: {get_uname(uid, mydb)}")
         for friend_id, friend_username in friends.items():
             if friend_id in online_users.keys():
-                print(f"Sending online friends to connecting user: {user_id}")
                 emit(
                     "friend_online",
                     {"username": friend_username},

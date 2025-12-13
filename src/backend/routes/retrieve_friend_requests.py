@@ -19,7 +19,6 @@ def register_routes(app, mydb: MySQLConnection):
         cursor = mydb.cursor()
         cursor.execute(query, values)
         result = cursor.fetchall()
-        print(result)
 
         for row in result:
             get_friend_info_query = "SELECT username FROM users WHERE user_id = %s"
@@ -28,6 +27,5 @@ def register_routes(app, mydb: MySQLConnection):
             cursor.execute(get_friend_info_query, sender_id)
             username = cursor.fetchone()
             friend_requests.append(username[0])
-        print(friend_requests)
 
         return jsonify({"status": 200, "data": friend_requests})

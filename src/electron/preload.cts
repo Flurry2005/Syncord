@@ -36,12 +36,18 @@ contextBridge.exposeInMainWorld("electron", {
   }),
   establishSocketConnection: (): Promise<any> =>
     ipcRenderer.invoke("establish-socket-connection"),
+  closeSocketConnection: (): Promise<any> =>
+    ipcRenderer.invoke("close-socket-connection"),
   onFriendOnline: (callback: (data: any) => void) => {
       ipcRenderer.on("friend_online", (_event: any, data: any) => callback(data));
   },
+  offFriendOnline: (callback: any) =>
+    ipcRenderer.removeListener("friend_online", callback),
   onFriendOffline: (callback: (data: any) => void) => {
       ipcRenderer.on("friend_offline", (_event: any, data: any) => callback(data));
   },
+  offFriendOffline: (callback: any) =>
+    ipcRenderer.removeListener("friend_offline", callback),
   emit: (channel: string, data?: any) => {
     ipcRenderer.send(channel, data);
   },

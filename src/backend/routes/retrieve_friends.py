@@ -39,8 +39,6 @@ def register_routes(app, mydb: MySQLConnection):
                     cursor.execute(get_friend_info_query, values_1)
                     username = cursor.fetchone()
                     friend_list.append(username[0])
-
-            print(friend_list)
             return jsonify(
                 {
                     "status": 200,

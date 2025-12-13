@@ -23,6 +23,14 @@ function LoginPage({ login }: LoginPageProps) {
       const res = await window.electron.verifyJWT();
 
       if (res.success) {
+        //Establish socket connection to server
+        // @ts-ignore
+        const res1 = await window.electron.establishSocketConnection();
+
+        if (!res1.success) {
+          console.error(res.err);
+          return false;
+        }
         login(true, username);
       } else {
         console.log("Failed auto login: " + res.success);
@@ -62,7 +70,7 @@ function LoginPage({ login }: LoginPageProps) {
   const handleLogin = async () => {
     try {
       if (username.length == 0 || password.length == 0) {
-        verify();
+        if (!verify()) setServerResponse("Failed establishing connection!");
         return;
       }
       // @ts-ignore
@@ -81,7 +89,10 @@ function LoginPage({ login }: LoginPageProps) {
         // @ts-ignore
         const res = await window.electron.establishSocketConnection();
 
-        if (!res.success) return false;
+        if (!res.success) {
+          console.error(res.err);
+          return false;
+        }
 
         setServerResponse(result.data.desc);
         return true;

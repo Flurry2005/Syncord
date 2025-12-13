@@ -30,7 +30,6 @@ def get_friends(user_id, mydb: MySQLConnection):
                 username = cursor.fetchone()
                 friend_list[friend_id] = username[0]
 
-        print(friend_list)
         return friend_list
     except Exception as err:
         print(err)

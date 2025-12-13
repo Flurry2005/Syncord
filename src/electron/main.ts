@@ -131,12 +131,19 @@ app.on("ready", () => {
             });
         } catch (err) {
             console.error("[Socket.IO] Connection failed:", err);
-            return false; // Return false if it fails
+            return {success: false, err: err}; // Return false if it fails
         }
 
         socket.on("friend_online", (data) => {mainWindow.webContents.send("friend_online", data); console.log(data)});
         socket.on("friend_offline", (data) => {mainWindow.webContents.send("friend_offline", data); console.log(data)});
         console.log("Main process Tried to establish socket connection: ", socket.connected);
+        return {success: socket.connected}; // Return true if connected
+    });
+    ipcMain.handle("close-socket-connection", async (_event) => {
+        socket.disconnect();
+        socket.removeAllListeners();
+
+        console.log("Main process Tried to close socket connection: ", socket.connected);
         return {success: socket.connected}; // Return true if connected
     });
     ipcMain.handle("verify-JWT", async (_event, { endpoint, options }) => {

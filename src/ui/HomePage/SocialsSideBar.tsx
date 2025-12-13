@@ -29,29 +29,51 @@ export default function SocialsSidebar({
 
   // Fetch friend on first load
   useEffect(() => {
-    handleGetFriends();
-    // @ts-ignore
-    window.electron.onFriendOnline((data: any) => {
-      const username = data.username;
+    let handleFriendOnline: (data: any) => void;
+    let handleFriendOffline: (data: any) => void;
 
-      setFriends((prev) => {
-        return prev.map((friend) =>
-          friend.username === username ? { ...friend, online: true } : friend
-        );
-      });
-    });
-    // @ts-ignore
-    window.electron.onFriendOffline((data: any) => {
-      const username = data.username;
+    (async () => {
+      await handleGetFriends();
 
-      setFriends((prev) => {
-        return prev.map((friend) =>
-          friend.username === username ? { ...friend, online: false } : friend
+      handleFriendOnline = (data: any) => {
+        const username = data.username;
+
+        setFriends((prev) =>
+          prev.map((friend) =>
+            friend.username === username ? { ...friend, online: true } : friend
+          )
         );
-      });
-    });
-    // @ts-ignore
-    window.electron.emit("frontend_ready");
+      };
+
+      handleFriendOffline = (data: any) => {
+        const username = data.username;
+
+        setFriends((prev) =>
+          prev.map((friend) =>
+            friend.username === username ? { ...friend, online: false } : friend
+          )
+        );
+      };
+
+      // @ts-ignore
+      window.electron.onFriendOnline(handleFriendOnline);
+      // @ts-ignore
+      window.electron.onFriendOffline(handleFriendOffline);
+
+      // @ts-ignore
+      window.electron.emit("frontend_ready");
+    })();
+
+    return () => {
+      if (handleFriendOnline) {
+        // @ts-ignore
+        window.electron.offFriendOnline(handleFriendOnline);
+      }
+      if (handleFriendOffline) {
+        // @ts-ignore
+        window.electron.offFriendOffline(handleFriendOffline);
+      }
+    };
   }, []);
 
   useEffect(() => {

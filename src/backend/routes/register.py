@@ -47,7 +47,6 @@ def hash_pass(password, ph: PasswordHasher):
     # Hash a password
     # --------------------------
     hashed_password = ph.hash(password)
-    print("Hashed password:", hashed_password)
     return hashed_password
 
 

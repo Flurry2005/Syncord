@@ -17,9 +17,9 @@ function FriendsList({
 }: FriendsListProps) {
   return (
     <ul className="flex flex-col items-center gap-2 w-full">
-      <button onClick={handleGetFriends} className="border-(-accent-color)">
+      {/* <button onClick={handleGetFriends} className="border-(-accent-color)">
         Fetch friends
-      </button>
+      </button> */}
       {friends.map((friend: Friend, index: number) => (
         <p
           key={index}

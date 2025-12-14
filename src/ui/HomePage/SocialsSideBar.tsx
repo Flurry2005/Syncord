@@ -4,6 +4,7 @@ import FriendsList from "./Friends";
 import FriendRequests from "./FriendRequests";
 import { useFriends } from "./context/FriendsContext";
 import UserBanner from "./UserBanner";
+import InputField from "../components/InputField";
 
 interface SocialsSidebarProps {
   username: string;
@@ -23,7 +24,8 @@ export default function SocialsSidebar({
   const [placeholder, setPlaceholder] = useState("Enter username...");
   const [friendRequestUsername, setFriendRequestUsername] = useState("");
   const [friendsMode, setFriendsMode] = useState(true);
-  const [friends, setFriends] = useState<Friend[]>([]);
+  const { setFriends } = useFriends();
+  const [friends, setFriendss] = useState<Friend[]>([]);
   const [friendRequests, setfriendRequests] = useState<string[]>([]);
   const { setSelectedFriend } = useFriends();
 
@@ -38,7 +40,7 @@ export default function SocialsSidebar({
       handleFriendOnline = (data: any) => {
         const username = data.username;
 
-        setFriends((prev) =>
+        setFriendss((prev) =>
           prev.map((friend) =>
             friend.username === username ? { ...friend, online: true } : friend
           )
@@ -48,7 +50,7 @@ export default function SocialsSidebar({
       handleFriendOffline = (data: any) => {
         const username = data.username;
 
-        setFriends((prev) =>
+        setFriendss((prev) =>
           prev.map((friend) =>
             friend.username === username ? { ...friend, online: false } : friend
           )
@@ -83,19 +85,19 @@ export default function SocialsSidebar({
   const handleGetFriends = async () => {
     //@ts-ignore
     const result = await window.electron.retrieveFriends();
-    if (!result) setFriends([]);
+    if (!result) setFriendss([]);
 
     if (result.success) {
       const friendsList = result.data;
-
-      setFriends(
+      setFriends(friendsList);
+      setFriendss(
         friendsList.map((u: string) => ({
           username: u,
           online: false,
         }))
       );
     } else {
-      setFriends([]);
+      setFriendss([]);
     }
   };
   const handleRetrieveFriendRequests = async () => {
@@ -148,8 +150,11 @@ export default function SocialsSidebar({
   };
 
   return (
-    <nav className="justify-items-center grid grid-rows-[.1fr_.2fr_.3fr_3fr_.4fr_.2fr] bg-neutral-900 w-60 h-full">
-      <h1>Social</h1>
+    <nav className="justify-items-center gap-2 grid grid-rows-[.3fr_.2fr_.3fr_3fr_.4fr_.2fr] bg-neutral-900 w-60 h-full">
+      <h1 className="flex justify-center items-center border-neutral-600 border-b w-9/10 font-semibold text-center">
+        Social
+      </h1>
+
       <div className="flex gap-4">
         <button
           className="flex justify-center justify-items-center items-center h-7"
@@ -168,38 +173,52 @@ export default function SocialsSidebar({
           ?
         </button>
       </div>
-      <div className="flex justify-around items-center">
-        <label htmlFor="friend-request-field"></label>
-        <input
-          id="friend-request-field"
-          value={friendRequestUsername}
-          onChange={(e) => {
-            setFriendRequestUsername(e.target.value);
-            setPlaceholder("Enter username...");
-          }}
-          placeholder={placeholder}
-          className="box-border bg-neutral-900 px-0.5 border border-neutral-800 focus:border-[#747bff] rounded-sm outline-none w-8/12 h-7"
-          type="text"
-        />
-        <button
-          className="flex justify-center justify-items-center items-center h-7"
-          onClick={handleSendFriendRequest}
-        >
-          <i className="fa-user-group flex justify-items-center items-center text-center fa-solid"></i>
-          +
-        </button>
+
+      <div className="flex flex-col justify-center items-center gap-2 w-full">
+        <h1 className="flex justify-center items-center border-neutral-600 border-b w-9/10 font-semibold text-center">
+          Friend Requests
+        </h1>
+        <div className="flex justify-around items-center">
+          <label htmlFor="friend-request-field"></label>
+          <InputField
+            id="friend-request-field"
+            value={friendRequestUsername}
+            onChange={(e) => {
+              setFriendRequestUsername(e.target.value);
+              setPlaceholder("Enter username...");
+            }}
+            placeholder={placeholder}
+            type={"text"}
+            additionalClasses="focus:border-[#747bff] w-8/12 h-7"
+          />
+          <button
+            className="flex justify-center justify-items-center items-center w-1/10 h-7"
+            onClick={handleSendFriendRequest}
+          >
+            <i className="fa-user-group flex justify-items-center items-center text-center fa-solid"></i>
+            +
+          </button>
+        </div>
       </div>
+
       {friendsMode ? (
-        <FriendsList
-          handleGetFriends={handleGetFriends}
-          handleFriendBannerClick={handleFriendBannerClick}
-          friends={friends}
-          friendsElements={friendsElements}
-        />
+        <div className="flex flex-col items-center w-full">
+          <h1 className="flex justify-center items-center border-neutral-600 border-b w-9/10 font-semibold text-center">
+            Friends
+          </h1>
+          <FriendsList
+            handleGetFriends={handleGetFriends}
+            handleFriendBannerClick={handleFriendBannerClick}
+            friends={friends}
+            friendsElements={friendsElements}
+          />
+        </div>
       ) : (
         <FriendRequests friendRequests={friendRequests} />
       )}
+
       <UserBanner uname={username} />
+
       <button
         className="flex justify-center items-center bg-red-700! border-0! w-3/4 h-3/4"
         onClick={() => logout(false)}

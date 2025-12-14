@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 interface FriendsContextType {
   selectedFriend: string | null;
   setSelectedFriend: (friend: string | null) => void;
+  friends: string[] | [];
+  setFriends: (friends: string[]) => void;
 }
 
 const FriendsContext = createContext<FriendsContextType | undefined>(undefined);
@@ -16,9 +18,12 @@ export const FriendsProvider: React.FC<FriendsProviderProps> = ({
   children,
 }) => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [friends, setFriends] = useState<string[]>([]);
 
   return (
-    <FriendsContext.Provider value={{ selectedFriend, setSelectedFriend }}>
+    <FriendsContext.Provider
+      value={{ selectedFriend, setSelectedFriend, friends, setFriends }}
+    >
       {children}
     </FriendsContext.Provider>
   );

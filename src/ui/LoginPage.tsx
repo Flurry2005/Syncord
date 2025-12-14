@@ -138,6 +138,16 @@ function LoginPage({ login }: LoginPageProps) {
           value={password}
           type="password"
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={async (e) => {
+            if (e.key === "Enter") {
+              const success = loginMode
+                ? await handleLogin()
+                : await handleRegister();
+              if (success) {
+                login(true, username);
+              }
+            }
+          }}
           className="px-2 border border-(--accent-color) rounded-xl outline-none"
         />
         {registered ? (

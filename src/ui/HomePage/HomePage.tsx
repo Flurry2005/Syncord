@@ -10,11 +10,13 @@ interface HomePageProps {
 
 function HomePage({ logout, username }: HomePageProps) {
   return (
-    <main className="flex w-full h-full">
-      <FriendsProvider>
-        <SocialsSidebar logout={logout} username={username}></SocialsSidebar>
-        <ChatSection username={username}></ChatSection>
-      </FriendsProvider>
+    <main className="p-1 w-full h-full">
+      <div className="flex border border-neutral-600 rounded-2xl w-full h-full overflow-hidden">
+        <FriendsProvider>
+          <SocialsSidebar logout={logout} username={username}></SocialsSidebar>
+          <ChatSection username={username}></ChatSection>
+        </FriendsProvider>
+      </div>
     </main>
   );
 }

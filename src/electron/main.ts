@@ -17,8 +17,10 @@ app.commandLine.appendSwitch("enable-features", "AllowThirdPartyCookies");
 
 app.on("ready", () => {
     const mainWindow = new BrowserWindow({
-        width: 1920,
-        height: 1080,
+        width: 900,
+        height: 700,
+        minWidth: 900,
+        minHeight: 700,
         icon: path.join(app.getAppPath(), "/syncord_logo.png"),
         webPreferences:{
             preload: getPreloadPath(),
@@ -39,10 +41,12 @@ app.on("ready", () => {
         shell.openExternal(url);
         return { action: 'deny' };
     });
+    
     if(isDev()) {
         mainWindow.loadURL('http://localhost:5123');
         
     }else{
+        //mainWindow.setMenuBarVisibility(false);
         mainWindow.loadFile(path.join(app.getAppPath(), "/dist-react/index.html"));
     }
 

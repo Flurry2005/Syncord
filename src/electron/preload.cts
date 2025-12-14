@@ -39,10 +39,12 @@ contextBridge.exposeInMainWorld("electron", {
   sendMessage: (username: string, message: string): Promise<any> =>
     ipcRenderer.invoke("send-message", { username: username, message: message}),
   onIncomingMessage: (callback: (data: any) => void) => {
-      ipcRenderer.on("message_incoming", (_event: any, data: any) => callback(data));
+    const handler = (_event: any, data: any) => callback(data);
+    ipcRenderer.on("message_incoming", handler);
+    return handler;
   },
-  offIncomingMessage: (callback: any) =>
-    ipcRenderer.removeListener("message_incoming", callback),
+  offIncomingMessage: (handler: any) =>
+    ipcRenderer.removeListener("message_incoming", handler),
 
   establishSocketConnection: (): Promise<any> =>
     ipcRenderer.invoke("establish-socket-connection"),

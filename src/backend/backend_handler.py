@@ -47,6 +47,7 @@ class BackendHandler:
             user=os.environ.get("DBUSERNAME"),
             database="communication_app",
             password=os.environ.get("DBPASSWORD"),
+            autocommit=True,
         )
         self.app.before_request(self.before_every_request)
         self.register_routes()

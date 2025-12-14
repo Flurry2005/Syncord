@@ -38,7 +38,7 @@ function ChatSection({ username }: ChatSectionProps) {
 
   useEffect(() => {
     let handleIncomingMessage: (data: any) => void;
-
+    let listener: any;
     (async () => {
       handleIncomingMessage = (data: any) => {
         const username = data.username;
@@ -60,12 +60,12 @@ function ChatSection({ username }: ChatSectionProps) {
       };
 
       // @ts-ignore
-      window.electron.onIncomingMessage(handleIncomingMessage);
+      listener = window.electron.onIncomingMessage(handleIncomingMessage);
     })();
 
     return () => {
       // @ts-ignore
-      window.electron.offIncomingMessage(handleIncomingMessage);
+      window.electron.offIncomingMessage(listener);
     };
   }, []);
 
@@ -76,7 +76,6 @@ function ChatSection({ username }: ChatSectionProps) {
   const handleSendMessage = async () => {
     // @ts-ignore
     const res = await window.electron.sendMessage(selectedFriend, textConent);
-
     if (res.success) {
       setFriendChats((prev) =>
         prev.map((friendChat) =>

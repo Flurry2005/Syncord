@@ -4,6 +4,7 @@ from flask import request
 import jwt
 from utils.get_friends import get_friends  # implement this
 from utils.get_uname import get_uname  # implement this
+from utils.get_uid import get_uid  # implement this
 
 
 online_users = {}  # user_id: socket_id
@@ -50,6 +51,28 @@ def register_socket_events(socketio: SocketIO, mydb):
                     {"username": friend_username},
                     room=online_users[user_id],
                 )
+
+    @socketio.on("forward-message")
+    def forward_message(data):
+        user_id = None
+        username = None
+        for uid, sid in online_users.items():
+            if sid == request.sid:
+                user_id = uid
+                break
+
+        username = get_uname(user_id, mydb)
+        recipient_username = data["username"]
+        message = data["message"]
+        recipient_uid, err = get_uid(recipient_username, mydb)
+
+        if recipient_uid in online_users.keys():
+            emit(
+                "message_incoming",
+                {"username": username, "message": message},
+                room=online_users[recipient_uid],
+            )
+        return {"success": 200}, 200
 
     @socketio.on("disconnect")
     def handle_disconnect():

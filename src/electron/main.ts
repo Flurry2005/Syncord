@@ -107,6 +107,14 @@ app.on("ready", () => {
         console.log("Main process Friend Request Decision result:", res.success);
         return { success: res.success, desc: res.desc };
     });
+    ipcMain.handle("send-message", async (_event,  data) => {
+        return new Promise((resolve) => {
+        socket.emit("forward-message", data, (response: any) => {
+            console.log("Main process Sent Message!:", response.success);
+            resolve(response); // send back to renderer
+        });
+    });
+    });
 
     ipcMain.on("frontend_ready", async () => {
         if (!socket) return;
@@ -140,6 +148,8 @@ app.on("ready", () => {
 
         socket.on("friend_online", (data) => {mainWindow.webContents.send("friend_online", data); console.log(data)});
         socket.on("friend_offline", (data) => {mainWindow.webContents.send("friend_offline", data); console.log(data)});
+        socket.on("message_incoming",(data) => {mainWindow.webContents.send("message_incoming", data); console.log(data)})
+
         console.log("Main process Tried to establish socket connection: ", socket.connected);
         return {success: socket.connected}; // Return true if connected
     });

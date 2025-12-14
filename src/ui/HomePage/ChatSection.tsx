@@ -22,41 +22,79 @@ function ChatSection({ username }: ChatSectionProps) {
   const [friendChats, setFriendChats] = useState<FriendChat[]>([]);
 
   useEffect(() => {
-    // Setup friends chat
-    let arr: FriendChat[] = [];
+    setFriendChats((prevChats) => {
+      return friends.map((username) => {
+        const existing = prevChats.find((chat) => chat.username === username);
 
-    friends.forEach((username: string) => {
-      friendChats.forEach((friendChat) =>
-        friendChat.username === username
-          ? {
-              ...friendChat,
-              chatLog: [...friendChat.chatLog],
-            }
-          : arr.push({ username: username, chatLog: [] })
-      );
+        return (
+          existing ?? {
+            username: username,
+            chatLog: [],
+          }
+        );
+      });
     });
-
-    setFriendChats(arr);
   }, [friends]);
 
+  useEffect(() => {
+    let handleIncomingMessage: (data: any) => void;
+
+    (async () => {
+      handleIncomingMessage = (data: any) => {
+        const username = data.username;
+        const message = data.message;
+
+        setFriendChats((prev) =>
+          prev.map((friendChat) =>
+            friendChat.username === username
+              ? {
+                  ...friendChat,
+                  chatLog: [
+                    ...friendChat.chatLog,
+                    { username: username, msg: message },
+                  ],
+                }
+              : friendChat
+          )
+        );
+      };
+
+      // @ts-ignore
+      window.electron.onIncomingMessage(handleIncomingMessage);
+    })();
+
+    return () => {
+      // @ts-ignore
+      window.electron.offIncomingMessage(handleIncomingMessage);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("Constructed FriendsChat[]", friendChats);
+  }, [friendChats]);
+
   const handleSendMessage = async () => {
-    setFriendChats((prev) =>
-      prev.map((friendChat) =>
-        friendChat.username === selectedFriend
-          ? {
-              ...friendChat,
-              chatLog: [
-                ...friendChat.chatLog,
-                { username: "Me", msg: textConent },
-              ],
-            }
-          : friendChat
-      )
-    );
+    // @ts-ignore
+    const res = await window.electron.sendMessage(selectedFriend, textConent);
 
-    console.log(friendChats);
+    if (res.success) {
+      setFriendChats((prev) =>
+        prev.map((friendChat) =>
+          friendChat.username === selectedFriend
+            ? {
+                ...friendChat,
+                chatLog: [
+                  ...friendChat.chatLog,
+                  { username: "Me", msg: textConent },
+                ],
+              }
+            : friendChat
+        )
+      );
+      console.log("Current friends chat: ", friendChats);
 
-    setTextContent("");
+      setTextContent("");
+    }
   };
 
   return (

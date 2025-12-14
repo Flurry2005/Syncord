@@ -10,7 +10,6 @@ interface FriendsListProps {
 }
 
 function FriendsList({
-  handleGetFriends,
   friends,
   friendsElements,
   handleFriendBannerClick,

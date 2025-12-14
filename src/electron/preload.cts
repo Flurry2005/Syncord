@@ -34,6 +34,16 @@ contextBridge.exposeInMainWorld("electron", {
     options: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: username, accept: accept}) },
     username,
   }),
+
+  // Sockets
+  sendMessage: (username: string, message: string): Promise<any> =>
+    ipcRenderer.invoke("send-message", { username: username, message: message}),
+  onIncomingMessage: (callback: (data: any) => void) => {
+      ipcRenderer.on("message_incoming", (_event: any, data: any) => callback(data));
+  },
+  offIncomingMessage: (callback: any) =>
+    ipcRenderer.removeListener("message_incoming", callback),
+
   establishSocketConnection: (): Promise<any> =>
     ipcRenderer.invoke("establish-socket-connection"),
   closeSocketConnection: (): Promise<any> =>

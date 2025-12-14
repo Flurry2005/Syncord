@@ -17,10 +17,10 @@ app.commandLine.appendSwitch("enable-features", "AllowThirdPartyCookies");
 
 app.on("ready", () => {
     const mainWindow = new BrowserWindow({
-        width: 900,
+        width: 1245,
         height: 700,
-        minWidth: 900,
-        minHeight: 700,
+        minWidth: 800,
+        minHeight: 500,
         icon: path.join(app.getAppPath(), "/syncord_logo.png"),
         webPreferences:{
             preload: getPreloadPath(),

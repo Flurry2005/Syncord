@@ -1,8 +1,7 @@
 import React from "react";
-import type { Friend } from "./CustomTypes";
+import type { Friend } from "../CustomTypes/CustomTypes";
+import { useFriends } from "./context/FriendsContext";
 interface FriendsListProps {
-  handleGetFriends: () => void;
-  friends: Friend[];
   friendsElements: React.RefObject<HTMLParagraphElement[]>;
   handleFriendBannerClick: (
     event: React.MouseEvent<HTMLParagraphElement>
@@ -10,10 +9,11 @@ interface FriendsListProps {
 }
 
 function FriendsList({
-  friends,
   friendsElements,
   handleFriendBannerClick,
 }: FriendsListProps) {
+  const { friends } = useFriends();
+
   return (
     <ul className="flex flex-col items-center gap-2 w-full">
       {/* <button onClick={handleGetFriends} className="border-(-accent-color)">

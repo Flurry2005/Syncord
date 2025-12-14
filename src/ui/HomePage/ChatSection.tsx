@@ -1,40 +1,15 @@
 import { useEffect, useState } from "react";
 import { useFriends } from "./context/FriendsContext";
 import ChatTextArea from "../components/ChatTextArea";
+import type { Friend, Message } from "../CustomTypes/CustomTypes";
 
 interface ChatSectionProps {
   username: string;
 }
 
-type FriendChat = {
-  username: string;
-  chatLog: Message[];
-};
-
-type Message = {
-  username: string;
-  msg: string;
-};
-
 function ChatSection({ username }: ChatSectionProps) {
   const [textConent, setTextContent] = useState("");
-  const { selectedFriend, friends } = useFriends();
-  const [friendChats, setFriendChats] = useState<FriendChat[]>([]);
-
-  useEffect(() => {
-    setFriendChats((prevChats) => {
-      return friends.map((username) => {
-        const existing = prevChats.find((chat) => chat.username === username);
-
-        return (
-          existing ?? {
-            username: username,
-            chatLog: [],
-          }
-        );
-      });
-    });
-  }, [friends]);
+  const { selectedFriend, friends, setFriends } = useFriends();
 
   useEffect(() => {
     let handleIncomingMessage: (data: any) => void;
@@ -44,17 +19,14 @@ function ChatSection({ username }: ChatSectionProps) {
         const username = data.username;
         const message = data.message;
 
-        setFriendChats((prev) =>
-          prev.map((friendChat) =>
-            friendChat.username === username
+        setFriends((prev: Friend[]) =>
+          prev.map((friend: Friend) =>
+            friend.username === username
               ? {
-                  ...friendChat,
-                  chatLog: [
-                    ...friendChat.chatLog,
-                    { username: username, msg: message },
-                  ],
+                  ...friend,
+                  chat: [...friend.chat, { username: username, msg: message }],
                 }
-              : friendChat
+              : friend
           )
         );
       };
@@ -69,28 +41,20 @@ function ChatSection({ username }: ChatSectionProps) {
     };
   }, []);
 
-  useEffect(() => {
-    console.log("Constructed FriendsChat[]", friendChats);
-  }, [friendChats]);
-
   const handleSendMessage = async () => {
     // @ts-ignore
     const res = await window.electron.sendMessage(selectedFriend, textConent);
     if (res.success) {
-      setFriendChats((prev) =>
-        prev.map((friendChat) =>
-          friendChat.username === selectedFriend
+      setFriends((prev: Friend[]) =>
+        prev.map((friend: Friend) =>
+          friend.username === selectedFriend
             ? {
-                ...friendChat,
-                chatLog: [
-                  ...friendChat.chatLog,
-                  { username: "Me", msg: textConent },
-                ],
+                ...friend,
+                chat: [...friend.chat, { username: "Me", msg: textConent }],
               }
-            : friendChat
+            : friend
         )
       );
-      console.log("Current friends chat: ", friendChats);
 
       setTextContent("");
     }
@@ -104,15 +68,17 @@ function ChatSection({ username }: ChatSectionProps) {
             {selectedFriend + " - Chat"}
           </p>
           <div className="self-center bg-neutral-900 rounded-2xl w-9/10 h-8/10">
-            {friendChats.map((friendChat) => {
-              if (friendChat.username === selectedFriend) {
-                return friendChat.chatLog.map((message, index) => {
-                  return (
-                    <p key={index}>
-                      {message.username}: {message.msg}
-                    </p>
-                  );
-                });
+            {friends.map((friend) => {
+              if (friend.username === selectedFriend) {
+                return friend.chat.map(
+                  ({ username, msg }: Message, index: any) => {
+                    return (
+                      <p key={index}>
+                        {username}: {msg}
+                      </p>
+                    );
+                  }
+                );
               }
             })}
           </div>

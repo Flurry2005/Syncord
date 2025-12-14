@@ -5,16 +5,12 @@ import FriendRequests from "./FriendRequests";
 import { useFriends } from "./context/FriendsContext";
 import UserBanner from "./UserBanner";
 import InputField from "../components/InputField";
+import type { Friend } from "../CustomTypes/CustomTypes";
 
 interface SocialsSidebarProps {
   username: string;
   logout: (val: boolean) => void;
 }
-
-type Friend = {
-  username: string;
-  online: boolean;
-};
 
 export default function SocialsSidebar({
   username,
@@ -25,7 +21,6 @@ export default function SocialsSidebar({
   const [friendRequestUsername, setFriendRequestUsername] = useState("");
   const [friendsMode, setFriendsMode] = useState(true);
   const { setFriends } = useFriends();
-  const [friends, setFriendss] = useState<Friend[]>([]);
   const [friendRequests, setfriendRequests] = useState<string[]>([]);
   const { setSelectedFriend } = useFriends();
 
@@ -40,8 +35,8 @@ export default function SocialsSidebar({
       handleFriendOnline = (data: any) => {
         const username = data.username;
 
-        setFriendss((prev) =>
-          prev.map((friend) =>
+        setFriends((prev: Friend[]) =>
+          prev.map((friend: Friend) =>
             friend.username === username ? { ...friend, online: true } : friend
           )
         );
@@ -50,8 +45,8 @@ export default function SocialsSidebar({
       handleFriendOffline = (data: any) => {
         const username = data.username;
 
-        setFriendss((prev) =>
-          prev.map((friend) =>
+        setFriends((prev: Friend[]) =>
+          prev.map((friend: Friend) =>
             friend.username === username ? { ...friend, online: false } : friend
           )
         );
@@ -78,28 +73,28 @@ export default function SocialsSidebar({
     };
   }, []);
 
-  useEffect(() => {
-    console.log("Friends updated:", friends);
-  }, [friends]);
-
   const handleGetFriends = async () => {
     //@ts-ignore
     const result = await window.electron.retrieveFriends();
-    if (!result) setFriendss([]);
+    if (!result) setFriends([]);
 
     if (result.success) {
-      const friendsList = result.data;
-      setFriends(friendsList);
-      setFriendss(
-        friendsList.map((u: string) => ({
-          username: u,
-          online: false,
-        }))
+      const friendsList: string[] = result.data;
+      setFriends((prev: Friend[]) =>
+        friendsList.map((username: string) => {
+          const alreadyExists: boolean = prev.some(
+            (friend) => friend.username === username
+          );
+          return alreadyExists
+            ? prev.find((friend) => friend.username === username)! // keep existing friend object
+            : { username: username, online: false, chat: [] }; // or create a new Friend object
+        })
       );
     } else {
-      setFriendss([]);
+      setFriends([]);
     }
   };
+
   const handleRetrieveFriendRequests = async () => {
     //@ts-ignore
     const result = await window.electron.retrieveFriendRequests();
@@ -126,14 +121,12 @@ export default function SocialsSidebar({
     );
 
     if (result.success) {
-      console.log("Request Send!");
       setPlaceholder(result.desc);
       setFriendRequestUsername("");
     } else {
       console.log(result);
       setPlaceholder(result.desc);
       setFriendRequestUsername("");
-      console.log("Failed to send friend request");
     }
   };
 
@@ -150,7 +143,7 @@ export default function SocialsSidebar({
   };
 
   return (
-    <nav className="justify-items-center gap-2 grid grid-rows-[.3fr_.2fr_.3fr_3fr_.4fr_.2fr] bg-neutral-900 w-60 h-full">
+    <nav className="justify-items-center gap-2 grid grid-rows-[.3fr_.2fr_.3fr_3fr_.4fr_.2fr] bg-neutral-900 border-neutral-500 border-r w-60 h-full">
       <h1 className="flex justify-center items-center border-neutral-600 border-b w-9/10 font-semibold text-center">
         Social
       </h1>
@@ -207,9 +200,7 @@ export default function SocialsSidebar({
             Friends
           </h1>
           <FriendsList
-            handleGetFriends={handleGetFriends}
             handleFriendBannerClick={handleFriendBannerClick}
-            friends={friends}
             friendsElements={friendsElements}
           />
         </div>

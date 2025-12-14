@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
-import type { ReactNode } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
+import type { Friend } from "../CustomTypes";
 
 interface FriendsContextType {
   selectedFriend: string | null;
   setSelectedFriend: (friend: string | null) => void;
-  friends: string[] | [];
-  setFriends: (friends: string[]) => void;
+  friends: Friend[] | [];
+  setFriends: Dispatch<SetStateAction<Friend[]>>;
 }
 
 const FriendsContext = createContext<FriendsContextType | undefined>(undefined);
@@ -18,7 +19,7 @@ export const FriendsProvider: React.FC<FriendsProviderProps> = ({
   children,
 }) => {
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
-  const [friends, setFriends] = useState<string[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
 
   return (
     <FriendsContext.Provider

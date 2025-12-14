@@ -45,7 +45,6 @@ contextBridge.exposeInMainWorld("electron", {
   },
   offIncomingMessage: (handler: any) =>
     ipcRenderer.removeListener("message_incoming", handler),
-
   establishSocketConnection: (): Promise<any> =>
     ipcRenderer.invoke("establish-socket-connection"),
   closeSocketConnection: (): Promise<any> =>
@@ -63,5 +62,12 @@ contextBridge.exposeInMainWorld("electron", {
   emit: (channel: string, data?: any) => {
     ipcRenderer.send(channel, data);
   },
+  onUpdateFriends: (callback: (data: any) => void) => {
+    const handler = (_event: any, data: any) => callback(data);
+    ipcRenderer.on("update_friends", handler);
+    return handler;
+  },
+  offUpdateFriends: (handler: any) =>
+    ipcRenderer.removeListener("update_friends", handler),
   
 });

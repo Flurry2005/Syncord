@@ -1,11 +1,7 @@
 export type Friend = {
   username: string;
   online: boolean;
-  chat: FriendChat[];
-};
-
-export type FriendChat = {
-  message: Message[];
+  chat: Message[];
 };
 
 export type Message = {

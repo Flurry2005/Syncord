@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import type { Friend } from "../CustomTypes";
+import type { Friend } from "../../CustomTypes/CustomTypes";
 
 interface FriendsContextType {
   selectedFriend: string | null;

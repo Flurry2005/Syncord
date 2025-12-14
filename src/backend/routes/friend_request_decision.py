@@ -6,6 +6,7 @@ from argon2 import PasswordHasher
 import time
 import jwt
 from utils.get_uid import get_uid
+from socketio_manager import socketio, online_users
 
 
 def register_routes(app, mydb: MySQLConnection):
@@ -47,5 +48,8 @@ def register_routes(app, mydb: MySQLConnection):
             print("Delete failed:", e)
 
             return jsonify({"status": 500, "desc": e.errno})
+
+        socketio.emit("update_friends", room=online_users[sender_uid])
+        socketio.emit("update_friends", room=online_users[uid_to_accept])
 
         return jsonify({"status": 200, "desc": "Friend request accepted!"})

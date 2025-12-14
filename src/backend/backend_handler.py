@@ -3,7 +3,6 @@ from flask import Flask, request, jsonify, g
 from flask_socketio import SocketIO
 import mysql.connector
 from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
 import jwt
 from flask_cors import CORS
 import client_handler
@@ -17,6 +16,7 @@ from routes import (
     friend_request_decision,
 )
 from dotenv import load_dotenv
+from socketio_manager import socketio
 
 load_dotenv()
 
@@ -95,8 +95,7 @@ class BackendHandler:
 
 
 handler = BackendHandler()
-socketio = SocketIO(handler.app)
-
+socketio.init_app(handler.app)
 client_handler.register_socket_events(socketio, handler.mydb)
 
 if __name__ == "__main__":

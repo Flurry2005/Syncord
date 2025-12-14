@@ -5,6 +5,7 @@ from mysql.connector import MySQLConnection
 from argon2 import PasswordHasher
 import time
 import jwt
+from socketio_manager import socketio, online_users
 
 from utils.get_uid import get_uid
 

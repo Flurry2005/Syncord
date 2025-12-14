@@ -46,7 +46,7 @@ function ChatSection({ username }: ChatSectionProps) {
     const res = await window.electron.sendMessage(selectedFriend, textConent);
     if (res.success) {
       setFriends((prev: Friend[]) =>
-        prev.map((friend: Friend) =>
+        prev.map((friend) =>
           friend.username === selectedFriend
             ? {
                 ...friend,

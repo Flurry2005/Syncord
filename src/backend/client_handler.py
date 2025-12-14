@@ -5,9 +5,7 @@ import jwt
 from utils.get_friends import get_friends  # implement this
 from utils.get_uname import get_uname  # implement this
 from utils.get_uid import get_uid  # implement this
-
-
-online_users = {}  # user_id: socket_id
+from socketio_manager import socketio, online_users
 
 
 def register_socket_events(socketio: SocketIO, mydb):

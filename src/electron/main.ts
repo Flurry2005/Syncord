@@ -149,6 +149,7 @@ app.on("ready", () => {
         socket.on("friend_online", (data) => {mainWindow.webContents.send("friend_online", data); console.log(data)});
         socket.on("friend_offline", (data) => {mainWindow.webContents.send("friend_offline", data); console.log(data)});
         socket.on("message_incoming",(data) => {mainWindow.webContents.send("message_incoming", data); console.log(data)})
+        socket.on("update_friends", (data) => {mainWindow.webContents.send("update_friends", data); console.log(data)})
 
         console.log("Main process Tried to establish socket connection: ", socket.connected);
         return {success: socket.connected}; // Return true if connected

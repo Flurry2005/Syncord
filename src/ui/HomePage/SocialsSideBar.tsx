@@ -28,6 +28,7 @@ export default function SocialsSidebar({
   useEffect(() => {
     let handleFriendOnline: (data: any) => void;
     let handleFriendOffline: (data: any) => void;
+    let handleUpdateFriends: (data: any) => void;
 
     (async () => {
       await handleGetFriends();
@@ -52,10 +53,16 @@ export default function SocialsSidebar({
         );
       };
 
+      handleUpdateFriends = async () => {
+        await handleGetFriends();
+      };
+
       // @ts-ignore
       window.electron.onFriendOnline(handleFriendOnline);
       // @ts-ignore
       window.electron.onFriendOffline(handleFriendOffline);
+      // @ts-ignore
+      window.electron.onUpdateFriends(handleUpdateFriends);
 
       // @ts-ignore
       window.electron.emit("frontend_ready");
@@ -70,6 +77,10 @@ export default function SocialsSidebar({
         // @ts-ignore
         window.electron.offFriendOffline(handleFriendOffline);
       }
+      // @ts-ignore
+      if (handleUpdateFriends)
+        // @ts-ignore
+        window.electron.offUpdateFriends(handleFriendOffline);
     };
   }, []);
 
